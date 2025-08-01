@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 EmoHunter - Live Camera Test</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh; padding: 20px;
+        }
+        .container {
+            max-width: 1200px; margin: 0 auto; background: white;
+            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; padding: 30px; text-align: center; border-radius: 20px 20px 0 0;
+        }
+        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px; }
+        .section { background: #f8f9fa; border-radius: 15px; padding: 25px; }
+        .video-container {
+            position: relative; background: #000; border-radius: 10px; overflow: hidden;
+            aspect-ratio: 4/3; margin-bottom: 20px;
+        }
+        #videoElement {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+        .video-overlay {
+            position: absolute; top: 10px; left: 10px; right: 10px;
+            background: rgba(0,0,0,0.7); color: white; padding: 10px;
+            border-radius: 5px; font-size: 0.9em;
+        }
+        .emotion-display {
+            background: white; border-radius: 10px; padding: 20px; text-align: center;
+            border: 3px solid #e9ecef; transition: all 0.3s ease;
+        }
+        .emotion-emoji { font-size: 3em; margin-bottom: 10px; }
+        .btn {
+            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
+            font-size: 1em; margin: 5px; transition: all 0.3s ease;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-danger { background: #dc3545; color: white; }
+        .log-area {
+            background: #212529; color: #28a745; padding: 15px; border-radius: 8px;
+            font-family: monospace; height: 200px; overflow-y: auto; margin-top: 20px;
+        }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
+        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 1.5em; font-weight: bold; color: #007bff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 EmoHunter - Live Camera Test</h1>
+            <p>Real Camera Feed + Backend Emotion Detection</p>
+        </div>
+        <div class="main-content">
+            <div class="section">
+                <h2>📹 Live Camera Feed</h2>
+                <div class="video-container">
+                    <video id="videoElement" autoplay muted></video>
+                    <div class="video-overlay" id="videoStatus">Camera not started</div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-success" onclick="startCamera()">📹 Start Camera</button>
+                    <button class="btn btn-danger" onclick="stopCamera()">⏹️ Stop Camera</button>
+                    <button class="btn btn-primary" onclick="captureFrame()">📸 Capture Frame</button>
+                </div>
+                <canvas id="captureCanvas" style="display: none;"></canvas>
+            </div>
+            <div class="section">
+                <h2>🎭 Emotion Detection</h2>
+                <div class="emotion-display">
+                    <div class="emotion-emoji" id="emotionEmoji">😐</div>
+                    <div id="emotionName">Neutral</div>
+                    <div id="emotionConfidence">Confidence: 0%</div>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-success" onclick="startDetection()">▶️ Start Detection</button>
+                    <button class="btn btn-danger" onclick="stopDetection()">⏹️ Stop Detection</button>
+                </div>
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-number" id="detectionCount">0</div>
+                        <div>Detections</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="avgConfidence">0%</div>
+                        <div>Avg Confidence</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="fps">0</div>
+                        <div>FPS</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section" style="grid-column: 1 / -1; margin: 0 30px 30px;">
+            <h2>📋 Activity Log</h2>
+            <div class="log-area" id="logArea"></div>
+            <button class="btn btn-primary" onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+    </div>
+
+    <script>
+        let videoElement, canvas, ctx, ws;
+        let cameraActive = false, detectionActive = false;
+        let detectionCount = 0, confidenceSum = 0, lastFrameTime = 0;
+        
+        const emotionEmojis = {
+            happy: '😊', sad: '😢', angry: '😠', fear: '😨',
+            surprise: '😲', disgust: '🤢', neutral: '😐'
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            videoElement = document.getElementById('videoElement');
+            canvas = document.getElementById('captureCanvas');
+            ctx = canvas.getContext('2d');
+            log('🚀 Camera Test UI initialized');
+        });
+
+        function log(message) {
+            const logArea = document.getElementById('logArea');
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('logArea').innerHTML = '';
+        }
+
+        async function startCamera() {
+            try {
+                log('📹 Requesting camera access...');
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480 } 
+                });
+                videoElement.srcObject = stream;
+                cameraActive = true;
+                document.getElementById('videoStatus').textContent = 'Camera Active';
+                log('✅ Camera started successfully');
+            } catch (error) {
+                log(`❌ Camera access failed: ${error.message}`);
+                document.getElementById('videoStatus').textContent = 'Camera Access Denied';
+            }
+        }
+
+        function stopCamera() {
+            if (videoElement.srcObject) {
+                videoElement.srcObject.getTracks().forEach(track => track.stop());
+                videoElement.srcObject = null;
+            }
+            cameraActive = false;
+            document.getElementById('videoStatus').textContent = 'Camera Stopped';
+            log('⏹️ Camera stopped');
+        }
+
+        function captureFrame() {
+            if (!cameraActive) {
+                log('⚠️ Camera not active');
+                return;
+            }
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            ctx.drawImage(videoElement, 0, 0);
+            log('📸 Frame captured');
+        }
+
+        function startDetection() {
+            if (detectionActive || !cameraActive) {
+                log('⚠️ Camera must be active to start detection');
+                return;
+            }
+            log('🔄 Starting real-time emotion detection...');
+            detectionActive = true;
+            requestAnimationFrame(detectionLoop);
+        }
+
+        function detectionLoop() {
+            if (!detectionActive || !cameraActive) return;
+            
+            // Capture frame from video
+            captureFrame();
+            
+            // Convert canvas to blob and send to backend
+            canvas.toBlob(async function(blob) {
+                try {
+                    const formData = new FormData();
+                    formData.append('image', blob, 'frame.jpg');
+                    
+                    const response = await fetch('http://localhost:8000/analyze_frame', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        updateEmotionDisplay(data);
+                        updateStats(data.confidence || 0);
+                        log(`✅ Frame analyzed: ${data.emotion} (${(data.confidence * 100).toFixed(1)}%)`);
+                    } else {
+                        const errorText = await response.text();
+                        log(`❌ Frame analysis failed: ${response.status} - ${errorText}`);
+                    }
+                } catch (error) {
+                    log(`❌ Detection error: ${error.message}`);
+                    console.error('Full error details:', error);
+                }
+            }, 'image/jpeg', 0.8);
+            
+            // Continue detection loop (every 1000ms for more stability)
+            if (detectionActive) {
+                setTimeout(() => requestAnimationFrame(detectionLoop), 1000);
+            }
+        }
+
+        function stopDetection() {
+            detectionActive = false;
+            log('⏹️ Detection stopped');
+        }
+
+        function updateEmotionDisplay(data) {
+            const emoji = emotionEmojis[data.emotion] || '😐';
+            const confidence = ((data.confidence || 0) * 100).toFixed(1);
+            
+            document.getElementById('emotionEmoji').textContent = emoji;
+            document.getElementById('emotionName').textContent = 
+                data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1);
+            document.getElementById('emotionConfidence').textContent = `Confidence: ${confidence}%`;
+        }
+
+        function updateStats(confidence) {
+            detectionCount++;
+            confidenceSum += confidence;
+            const avgConfidence = ((confidenceSum / detectionCount) * 100).toFixed(1);
+            
+            document.getElementById('detectionCount').textContent = detectionCount;
+            document.getElementById('avgConfidence').textContent = `${avgConfidence}%`;
+        }
+
+        function updateLoop() {
+            if (detectionActive) {
+                const now = performance.now();
+                if (now - lastFrameTime > 16) { // ~60fps limit
+                    const fps = Math.round(1000 / (now - lastFrameTime));
+                    document.getElementById('fps').textContent = fps;
+                    lastFrameTime = now;
+                }
+                requestAnimationFrame(updateLoop);
+            }
+        }
+
+        window.addEventListener('beforeunload', function() {
+            stopCamera();
+            stopDetection();
+        });
+
+        // Remove WebSocket references since we're using direct HTTP requests
+        // The detection now sends actual camera frames to the backend for analysis
+    </script>
+</body>
+</html>

@@ -4,22 +4,25 @@ import cv2
 import json
 import os
 from typing import Optional
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request
 from fastapi.responses import StreamingResponse
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import numpy as np
-# Try to import ElevenLabs with fallback for different API versions
+# Try to import ElevenLabs with proper version handling
 try:
-    from elevenlabs import generate, set_api_key
-    ELEVENLABS_V1 = True
+    from elevenlabs.client import ElevenLabs
+    from elevenlabs import Voice, VoiceSettings
+    ELEVENLABS_AVAILABLE = True
+    print("ElevenLabs v2+ API loaded successfully")
 except ImportError:
     try:
-        from elevenlabs.client import ElevenLabs
-        from elevenlabs import Voice, VoiceSettings
-        ELEVENLABS_V1 = False
+        from elevenlabs import generate, set_api_key
+        ELEVENLABS_AVAILABLE = "v1"
+        print("ElevenLabs v1 API loaded successfully")
     except ImportError:
         print("Warning: ElevenLabs library not available. Voice generation will be disabled.")
-        ELEVENLABS_V1 = None
+        ELEVENLABS_AVAILABLE = False
 from dotenv import load_dotenv
 import threading
 import time
@@ -38,9 +41,17 @@ except ImportError as e:
             self.emotions = ["happy", "sad", "angry", "fear", "surprise", "disgust", "neutral"]
         
         def detect_emotions(self, frame):
-            # Mock emotion detection - returns random emotion for demo
-            emotion = random.choice(self.emotions)
-            confidence = random.uniform(0.6, 0.95)
+            # Mock emotion detection with more realistic behavior
+            # Bias towards current emotion to reduce rapid changes
+            if hasattr(self, 'last_mock_emotion') and random.random() < 0.7:
+                # 70% chance to keep the same emotion for stability
+                emotion = self.last_mock_emotion
+                confidence = random.uniform(0.75, 0.95)  # Higher confidence for stable emotions
+            else:
+                # 30% chance to change to a new emotion
+                emotion = random.choice(self.emotions)
+                confidence = random.uniform(0.6, 0.85)
+                self.last_mock_emotion = emotion
             emotions_dict = {e: 0.1 for e in self.emotions}
             emotions_dict[emotion] = confidence
             
@@ -56,6 +67,15 @@ load_dotenv()
 
 app = FastAPI(title="EmoHunter API", description="Real-time emotion detection and voice agent")
 
+# Add CORS middleware to handle browser requests
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify your domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Global variables for emotion detection
 current_emotion = "neutral"
 emotion_detector = FER(mtcnn=True)
@@ -64,10 +84,11 @@ cap = None
 
 # ElevenLabs configuration
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-if ELEVENLABS_API_KEY and ELEVENLABS_V1:
-    set_api_key(ELEVENLABS_API_KEY)
-elif ELEVENLABS_API_KEY and ELEVENLABS_V1 is False:
+if ELEVENLABS_API_KEY and ELEVENLABS_AVAILABLE == True:
     elevenlabs_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
+elif ELEVENLABS_API_KEY and ELEVENLABS_AVAILABLE == "v1":
+    set_api_key(ELEVENLABS_API_KEY)
+    elevenlabs_client = None
 else:
     elevenlabs_client = None
 
@@ -91,9 +112,14 @@ class EmotionResponse(BaseModel):
     confidence: float
     timestamp: float
 
+# Emotion stability tracking
+last_emotion = "neutral"
+emotion_stability_count = 0
+emotion_history = []
+
 def detect_emotion_from_frame(frame):
-    """Detect emotion from a single frame"""
-    global current_emotion
+    """Detect emotion from a single frame with stability improvements"""
+    global current_emotion, last_emotion, emotion_stability_count, emotion_history
     try:
         # Detect emotions
         result = emotion_detector.detect_emotions(frame)
@@ -104,22 +130,37 @@ def detect_emotion_from_frame(frame):
             dominant_emotion = max(emotions, key=emotions.get)
             confidence = emotions[dominant_emotion]
             
-            # Update global current emotion
-            current_emotion = dominant_emotion
+            # Add stability logic to reduce rapid changes
+            if dominant_emotion == last_emotion:
+                emotion_stability_count += 1
+            else:
+                emotion_stability_count = 1
+                
+            # Only change emotion if it's been consistent for 2+ frames or very high confidence
+            if emotion_stability_count >= 2 or confidence > 0.9:
+                current_emotion = dominant_emotion
+                last_emotion = dominant_emotion
+            
+            # Keep emotion history for smoothing
+            emotion_history.append(dominant_emotion)
+            if len(emotion_history) > 5:
+                emotion_history.pop(0)
             
             return {
-                "emotion": dominant_emotion,
+                "emotion": current_emotion,
                 "confidence": confidence,
                 "all_emotions": emotions,
+                "stability_count": emotion_stability_count,
                 "timestamp": time.time()
             }
     except Exception as e:
         print(f"Error detecting emotion: {e}")
     
     return {
-        "emotion": "neutral",
+        "emotion": current_emotion,
         "confidence": 0.0,
         "all_emotions": {},
+        "stability_count": 0,
         "timestamp": time.time()
     }
 
@@ -245,11 +286,43 @@ async def websocket_emotions(websocket: WebSocket):
         print(f"WebSocket error: {e}")
         await websocket.send_json({"error": str(e)})
 
+@app.post("/analyze_frame")
+async def analyze_frame(request: Request):
+    """Analyze a single frame sent from the browser camera"""
+    try:
+        # Get the image data from the request
+        form = await request.form()
+        image_file = form.get("image")
+        
+        if not image_file:
+            raise HTTPException(status_code=400, detail="No image provided")
+        
+        # Read the image data
+        image_data = await image_file.read()
+        
+        # Convert to numpy array for processing
+        import io
+        from PIL import Image
+        image = Image.open(io.BytesIO(image_data))
+        frame = np.array(image)
+        
+        # Detect emotion from the frame
+        emotion_result = detect_emotion_from_frame(frame)
+        
+        return {
+            "emotion": emotion_result["emotion"],
+            "confidence": emotion_result["confidence"],
+            "timestamp": emotion_result["timestamp"]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing frame: {str(e)}")
+
 @app.post("/talk")
 async def talk(request: TalkRequest):
     """Generate speech based on text and emotion using ElevenLabs"""
     
-    if not ELEVENLABS_API_KEY or ELEVENLABS_V1 is None:
+    if not ELEVENLABS_API_KEY or not ELEVENLABS_AVAILABLE:
         raise HTTPException(
             status_code=500, 
             detail="ElevenLabs API key not configured or library not available. Please set ELEVENLABS_API_KEY environment variable and install elevenlabs library."
@@ -263,26 +336,22 @@ async def talk(request: TalkRequest):
     
     try:
         # Generate audio using ElevenLabs (handle different API versions)
-        if ELEVENLABS_V1:
+        if ELEVENLABS_AVAILABLE == "v1":
             # Old API version
             audio = generate(
                 text=request.text,
                 voice=voice_config["voice"],
                 model="eleven_monolingual_v1"
             )
-        else:
-            # New API version
+        elif ELEVENLABS_AVAILABLE == True and elevenlabs_client:
+            # New API version (v2+)
             audio = elevenlabs_client.generate(
                 text=request.text,
-                voice=Voice(
-                    voice_id=voice_config["voice"],
-                    settings=VoiceSettings(
-                        stability=voice_config["stability"],
-                        similarity_boost=voice_config["similarity_boost"]
-                    )
-                ),
+                voice=voice_config["voice"],
                 model="eleven_monolingual_v1"
             )
+        else:
+            raise HTTPException(status_code=500, detail="ElevenLabs client not properly configured")
         
         # Convert audio to base64
         if isinstance(audio, bytes):
@@ -318,7 +387,7 @@ async def health_check():
         "status": "healthy",
         "camera_active": camera_active,
         "current_emotion": current_emotion,
-        "elevenlabs_configured": bool(ELEVENLABS_API_KEY)
+        "elevenlabs_configured": bool(ELEVENLABS_API_KEY and ELEVENLABS_AVAILABLE)
     }
 
 if __name__ == "__main__":

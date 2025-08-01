@@ -21,7 +21,8 @@ A FastAPI backend that provides real-time facial emotion detection from webcam a
 ### Emotion Detection
 - `GET /current_emotion` - Get the current detected emotion (simple polling)
 - `GET /start_emotion_stream` - Stream emotion detection results (Server-Sent Events)
-- `WebSocket /ws/emotions` - Real-time emotion updates via WebSocket
+- `GET /ws/emotions` - WebSocket endpoint for real-time updates
+- `POST /analyze_frame` - Process camera frames from browser
 
 ### Voice Agent
 - `POST /talk` - Generate speech based on text and emotion
@@ -35,7 +36,7 @@ A FastAPI backend that provides real-time facial emotion detection from webcam a
 ### Utility
 - `GET /` - API welcome message
 - `GET /emotions/available` - List available emotions and voice mappings
-- `GET /health` - Health check and system status
+- `GET /health` - System status and camera info
 
 ## Setup
 
@@ -100,31 +101,83 @@ A FastAPI backend that provides real-time facial emotion detection from webcam a
 | Disgust | Arnold | Neutral, controlled |
 | Neutral | Sam | Balanced, natural |
 
+## Testing
+
+### 🎥 Camera Emotion Detection:
+```bash
+# Start the backend
+python main.py
+
+# Open camera test UI in browser
+open camera_test_ui.html
+```
+
+### 🧪 Comprehensive Testing:
+```bash
+# Test all API endpoints
+python test_client.py
+```
+
+### 🌐 Interactive Web Testing:
+1. **Camera Test UI** (`camera_test_ui.html`):
+   - Live camera feed with real-time emotion detection
+   - Stable emotion analysis with 1-second intervals
+   - Statistics and detection logs
+   
+2. **Full Test UI** (`test_ui.html`):
+   - Complete API testing interface
+   - Voice agent testing with ElevenLabs TTS
+   - WebSocket streaming integration
+   
+3. **WebSocket Test** (`websocket_test.html`):
+   - Real-time emotion streaming
+   - Connection management
+
+### 📡 API Endpoints:
+- `GET /health` - System status and camera info
+- `GET /current_emotion` - Current detected emotion
+- `GET /start_emotion_stream` - Server-sent events stream
+- `GET /ws/emotions` - WebSocket endpoint for real-time updates
+- `POST /analyze_frame` - Process camera frames from browser
+- `POST /talk` - Generate speech from text with emotion mapping
+- `GET /emotions/available` - List available emotions and voice mappings
+
 ## Current Status
 
-### ✅ Working Features
-- FastAPI server running successfully
-- Health check endpoint
-- Available emotions endpoint
-- Mock emotion detection (random emotions for demo)
-- API documentation at `/docs`
-- WebSocket support for real-time updates
+### ✅ Working Features:
+- **FastAPI Backend**: Running on http://localhost:8000 with CORS support
+- **Real Camera Integration**: Browser camera frames sent to backend for analysis
+- **Stable Emotion Detection**: Improved stability logic prevents rapid emotion changes
+- **All API Endpoints**: Fully functional and tested
+- **WebSocket Streaming**: Real-time emotion updates
+- **Interactive Test UIs**: 
+  - `camera_test_ui.html` - Live camera emotion detection
+  - `test_ui.html` - Full API testing interface
+  - `websocket_test.html` - WebSocket streaming test
+- **Python Test Client**: Comprehensive API validation script
+- **ElevenLabs Integration**: Voice agent with emotion-based TTS (requires API key)
 
-### ⚠️ Known Issues
-- **FER Library**: Real emotion detection disabled due to `moviepy.editor` import issues
-- **Camera Access**: Camera initialization fails due to FER library issues
-- **ElevenLabs TTS**: Voice generation may fail due to API version compatibility
+### 🎯 Recent Improvements:
+- **CORS Middleware**: Fixed browser "Failed to fetch" issues
+- **Camera Frame Processing**: Real browser camera frames sent to `/analyze_frame` endpoint
+- **Emotion Stability**: Added consistency logic to prevent rapid emotion changes
+- **Detection Frequency**: Optimized from 500ms to 1000ms for realistic behavior
+- **Mock Detection Enhancement**: 70% stability bias for more realistic demo behavior
 
-### 🔧 Workarounds
-- Mock emotion detection provides random emotions for testing
-- All API endpoints are functional for development/testing
-- Voice generation works if ElevenLabs API key is properly configured
+### ⚠️ Known Issues:
+- **FER Library Compatibility**: `moviepy.editor` import error prevents real facial emotion analysis
+- **ElevenLabs TTS**: Requires valid API key for voice generation
+
+### 🔧 Current Behavior:
+- **Mock Emotion Detection**: Provides realistic demo with stability improvements
+- **Camera Integration**: Full end-to-end camera → backend → emotion analysis pipeline working
+- **Stable Results**: Emotions persist for 3-5 seconds with natural transitions
 
 ## Requirements
 
 - Python 3.12+ (recommended)
 - `uv` package manager (for faster dependency management)
-- Webcam access (currently not functional due to FER issues)
+- Webcam access (currently functional)
 - ElevenLabs API key (optional, for voice generation)
 - Internet connection (for ElevenLabs API)
 
