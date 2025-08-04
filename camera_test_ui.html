@@ -1,269 +1,1050 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎭 EmoHunter - Live Camera Test</title>
+    <title>🎭 EmoHunter Camera Test UI</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh; padding: 20px;
+            min-height: 100vh;
+            padding: 20px;
         }
+
         .container {
-            max-width: 1200px; margin: 0 auto; background: white;
-            border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
+
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; padding: 30px; text-align: center; border-radius: 20px 20px 0 0;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            padding: 30px;
+            text-align: center;
         }
-        .main-content { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; padding: 30px; }
-        .section { background: #f8f9fa; border-radius: 15px; padding: 25px; }
-        .video-container {
-            position: relative; background: #000; border-radius: 10px; overflow: hidden;
-            aspect-ratio: 4/3; margin-bottom: 20px;
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .panel {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border: 2px solid #e9ecef;
+        }
+
+        .panel h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
         #videoElement {
-            width: 100%; height: 100%; object-fit: cover;
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            object-fit: cover;
+            background: #000;
         }
-        .video-overlay {
-            position: absolute; top: 10px; left: 10px; right: 10px;
-            background: rgba(0,0,0,0.7); color: white; padding: 10px;
-            border-radius: 5px; font-size: 0.9em;
+
+        .camera-overlay {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
         }
+
         .emotion-display {
-            background: white; border-radius: 10px; padding: 20px; text-align: center;
-            border: 3px solid #e9ecef; transition: all 0.3s ease;
+            text-align: center;
+            margin: 20px 0;
         }
-        .emotion-emoji { font-size: 3em; margin-bottom: 10px; }
+
+        .emotion-emoji {
+            font-size: 4em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .emotion-text {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .chat-container {
+            height: 400px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            overflow-y: auto;
+            padding: 15px;
+            background: white;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            background: #007bff;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.ai {
+            background: #f1f3f4;
+            color: #333;
+            margin-right: auto;
+        }
+
+        .message.system {
+            background: #fff3cd;
+            color: #856404;
+            text-align: center;
+            font-style: italic;
+            margin: 10px auto;
+            max-width: 90%;
+        }
+
+        .message-meta {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 5px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #007bff;
+        }
+
         .btn {
-            padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer;
-            font-size: 1em; margin: 5px; transition: all 0.3s ease;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
         }
-        .btn-primary { background: #007bff; color: white; }
-        .btn-success { background: #28a745; color: white; }
-        .btn-danger { background: #dc3545; color: white; }
-        .log-area {
-            background: #212529; color: #28a745; padding: 15px; border-radius: 8px;
-            font-family: monospace; height: 200px; overflow-y: auto; margin-top: 20px;
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
         }
-        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; }
-        .stat-card { background: white; padding: 15px; border-radius: 8px; text-align: center; }
-        .stat-number { font-size: 1.5em; font-weight: bold; color: #007bff; }
+
+        .btn-primary:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+
+        .status-indicator.online {
+            background: #28a745;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .canvas-container {
+            display: none;
+        }
+
+        .detection-stats {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .logs {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            height: 200px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+
+        .log-entry.error {
+            color: #fc8181;
+        }
+
+        .log-entry.success {
+            color: #68d391;
+        }
+
+        .log-entry.info {
+            color: #63b3ed;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎭 EmoHunter - Live Camera Test</h1>
-            <p>Real Camera Feed + Backend Emotion Detection</p>
+            <h1>🎭 EmoHunter Camera Test UI</h1>
+            <p>Real camera facial recognition + Intelligent conversation + Session recording</p>
         </div>
+
         <div class="main-content">
-            <div class="section">
-                <h2>📹 Live Camera Feed</h2>
-                <div class="video-container">
-                    <video id="videoElement" autoplay muted></video>
-                    <div class="video-overlay" id="videoStatus">Camera not started</div>
+            <!-- Camera panel -->
+            <div class="panel">
+                <h2>
+                    <span class="status-indicator" id="cameraStatus"></span>
+                    📹 Camera Video
+                </h2>
+                
+                <div class="camera-container">
+                    <video id="videoElement" autoplay muted playsinline></video>
+                    <div class="camera-overlay" id="cameraOverlay">
+                        Camera not started
+                    </div>
                 </div>
+
                 <div class="controls">
-                    <button class="btn btn-success" onclick="startCamera()">📹 Start Camera</button>
-                    <button class="btn btn-danger" onclick="stopCamera()">⏹️ Stop Camera</button>
-                    <button class="btn btn-primary" onclick="captureFrame()">📸 Capture Frame</button>
+                    <button class="btn btn-success" id="startCameraBtn">Start Camera</button>
+                    <button class="btn btn-warning" id="stopCameraBtn" disabled>Stop Camera</button>
+                    <button class="btn btn-primary" id="captureBtn" disabled>Capture & Analyze</button>
                 </div>
-                <canvas id="captureCanvas" style="display: none;"></canvas>
+
+                <!-- Hidden canvas for image processing -->
+                <div class="canvas-container">
+                    <canvas id="captureCanvas"></canvas>
+                </div>
             </div>
-            <div class="section">
-                <h2>🎭 Emotion Detection</h2>
+
+            <!-- Emotion recognition panel -->
+            <div class="panel">
+                <h2>
+                    <span class="status-indicator" id="emotionStatus"></span>
+                    🎭 Emotion Recognition
+                </h2>
+
                 <div class="emotion-display">
-                    <div class="emotion-emoji" id="emotionEmoji">😐</div>
-                    <div id="emotionName">Neutral</div>
-                    <div id="emotionConfidence">Confidence: 0%</div>
+                    <span class="emotion-emoji" id="emotionEmoji">😐</span>
+                    <div class="emotion-text" id="emotionText">Waiting for detection</div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill" id="confidenceBar" style="width: 0%"></div>
+                    </div>
+                    <div id="confidenceText">Confidence: 0%</div>
                 </div>
+
+                <div class="detection-stats">
+                    <div class="stat-item">
+                        <span>Detection count:</span>
+                        <span id="detectionCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Last detection:</span>
+                        <span id="lastDetection">Not detected</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Detection status:</span>
+                        <span id="detectionStatus">Standby</span>
+                    </div>
+                </div>
+
                 <div class="controls">
-                    <button class="btn btn-success" onclick="startDetection()">▶️ Start Detection</button>
-                    <button class="btn btn-danger" onclick="stopDetection()">⏹️ Stop Detection</button>
+                    <button class="btn btn-success" id="startDetectionBtn" disabled>Start Detection</button>
+                    <button class="btn btn-warning" id="stopDetectionBtn" disabled>Stop Detection</button>
                 </div>
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-number" id="detectionCount">0</div>
-                        <div>Detections</div>
+            </div>
+
+            <!-- Conversation panel -->
+            <div class="panel">
+                <h2>
+                    <span class="status-indicator" id="chatStatus"></span>
+                    🤖 Intelligent Conversation
+                </h2>
+
+                <div class="chat-container" id="chatContainer">
+                    <div class="message system">
+                        🎭 EmoHunter started! Start camera to begin emotion recognition...
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="avgConfidence">0%</div>
-                        <div>Avg Confidence</div>
+                </div>
+
+                <div class="input-group">
+                    <input type="text" id="messageInput" placeholder="Enter your message..." />
+                    <button class="btn btn-primary" id="sendBtn">Send</button>
+                </div>
+
+                <div class="controls">
+                    <button class="btn btn-success" id="startRecordBtn">🎤 Start Recording</button>
+                    <button class="btn btn-warning" id="stopRecordBtn" disabled>⏹️ Stop Recording</button>
+                    <button class="btn btn-primary" id="testChatBtn">💬 Test Chat</button>
+                    <button class="btn btn-warning" id="clearChatBtn">🗑️ Clear Chat</button>
+                    <button class="btn btn-danger" id="newSessionBtn">🆕 New Session</button>
+                </div>
+
+                <!-- Voice control panel -->
+                <div class="panel" style="margin-top: 20px; background: #f0f8ff;">
+                    <h3>🎤 Voice Control</h3>
+                    <div class="controls">
+                        <button class="btn btn-success" id="voiceTestBtn">🎵 Voice Test</button>
+                        <button class="btn btn-primary" id="playLastResponseBtn" disabled>🔊 Play Response</button>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="fps">0</div>
-                        <div>FPS</div>
-                    </div>
+                    <div id="recordingStatus" style="margin-top: 10px; font-weight: bold; color: #666;">Ready to record...</div>
+                    <div id="voiceDebug" style="margin-top: 10px; font-size: 12px; color: #888;"></div>
                 </div>
             </div>
         </div>
-        <div class="section" style="grid-column: 1 / -1; margin: 0 30px 30px;">
-            <h2>📋 Activity Log</h2>
-            <div class="log-area" id="logArea"></div>
-            <button class="btn btn-primary" onclick="clearLog()">🗑️ Clear Log</button>
+
+        <!-- System logs -->
+        <div class="panel" style="margin: 0 30px 30px 30px;">
+            <h2>📋 System Logs</h2>
+            <div class="logs" id="systemLogs">
+                <div class="log-entry info">[INFO] EmoHunter Camera Test UI started</div>
+            </div>
         </div>
     </div>
 
     <script>
-        let videoElement, canvas, ctx, ws;
-        let cameraActive = false, detectionActive = false;
-        let detectionCount = 0, confidenceSum = 0, lastFrameTime = 0;
-        
-        const emotionEmojis = {
-            happy: '😊', sad: '😢', angry: '😠', fear: '😨',
-            surprise: '😲', disgust: '🤢', neutral: '😐'
+        // Configuration
+        const CONFIG = {
+            API_BASE: 'http://localhost:8000',
+            SESSION_ID: `session_${Date.now()}`,
+            USER_ID: 'camera_test_user',
+            DETECTION_INTERVAL: 3000 // Detect every 3 seconds
         };
 
-        document.addEventListener('DOMContentLoaded', function() {
-            videoElement = document.getElementById('videoElement');
-            canvas = document.getElementById('captureCanvas');
-            ctx = canvas.getContext('2d');
-            log('🚀 Camera Test UI initialized');
-        });
+        // Global state
+        let videoStream = null;
+        let detectionInterval = null;
+        let currentEmotion = 'neutral';
+        let detectionCount = 0;
+        let isDetecting = false;
+        
+        // Voice-related state
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let lastAudioResponse = null;
 
-        function log(message) {
-            const logArea = document.getElementById('logArea');
+        // Emotion mapping
+        const EMOTION_EMOJIS = {
+            happy: '😊',
+            sad: '😢', 
+            angry: '😠',
+            fear: '😰',
+            surprise: '😲',
+            disgust: '🤢',
+            neutral: '😐'
+        };
+
+        const EMOTION_NAMES = {
+            happy: 'Happy',
+            sad: 'Sad',
+            angry: 'Angry', 
+            fear: 'Fear',
+            surprise: 'Surprise',
+            disgust: 'Disgust',
+            neutral: 'Neutral'
+        };
+
+        // Logging function
+        function log(message, type = 'info') {
             const timestamp = new Date().toLocaleTimeString();
-            logArea.innerHTML += `<div>[${timestamp}] ${message}</div>`;
-            logArea.scrollTop = logArea.scrollHeight;
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            const logsContainer = document.getElementById('systemLogs');
+            logsContainer.appendChild(logEntry);
+            logsContainer.scrollTop = logsContainer.scrollHeight;
         }
 
-        function clearLog() {
-            document.getElementById('logArea').innerHTML = '';
-        }
-
+        // Start camera
         async function startCamera() {
             try {
-                log('📹 Requesting camera access...');
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { width: 640, height: 480 } 
-                });
-                videoElement.srcObject = stream;
-                cameraActive = true;
-                document.getElementById('videoStatus').textContent = 'Camera Active';
-                log('✅ Camera started successfully');
+                log('Starting camera...', 'info');
+                
+                const constraints = {
+                    video: {
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
+                    audio: false
+                };
+
+                videoStream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = videoStream;
+
+                // Update UI state
+                document.getElementById('startCameraBtn').disabled = true;
+                document.getElementById('stopCameraBtn').disabled = false;
+                document.getElementById('captureBtn').disabled = false;
+                document.getElementById('startDetectionBtn').disabled = false;
+                
+                document.getElementById('cameraStatus').className = 'status-indicator online';
+                document.getElementById('cameraOverlay').textContent = 'Camera started - Ready for detection';
+
+                log('Camera started successfully', 'success');
+                
             } catch (error) {
-                log(`❌ Camera access failed: ${error.message}`);
-                document.getElementById('videoStatus').textContent = 'Camera Access Denied';
+                log(`Camera start failed: ${error.message}`, 'error');
+                alert('Cannot access camera, please check permission settings');
             }
         }
 
+        // Stop camera
         function stopCamera() {
-            if (videoElement.srcObject) {
-                videoElement.srcObject.getTracks().forEach(track => track.stop());
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                
+                const videoElement = document.getElementById('videoElement');
                 videoElement.srcObject = null;
             }
-            cameraActive = false;
-            document.getElementById('videoStatus').textContent = 'Camera Stopped';
-            log('⏹️ Camera stopped');
-        }
 
-        function captureFrame() {
-            if (!cameraActive) {
-                log('⚠️ Camera not active');
-                return;
-            }
-            canvas.width = videoElement.videoWidth;
-            canvas.height = videoElement.videoHeight;
-            ctx.drawImage(videoElement, 0, 0);
-            log('📸 Frame captured');
-        }
-
-        function startDetection() {
-            if (detectionActive || !cameraActive) {
-                log('⚠️ Camera must be active to start detection');
-                return;
-            }
-            log('🔄 Starting real-time emotion detection...');
-            detectionActive = true;
-            requestAnimationFrame(detectionLoop);
-        }
-
-        function detectionLoop() {
-            if (!detectionActive || !cameraActive) return;
-            
-            // Capture frame from video
-            captureFrame();
-            
-            // Convert canvas to blob and send to backend
-            canvas.toBlob(async function(blob) {
-                try {
-                    const formData = new FormData();
-                    formData.append('image', blob, 'frame.jpg');
-                    
-                    const response = await fetch('http://localhost:8000/analyze_frame', {
-                        method: 'POST',
-                        body: formData
-                    });
-                    
-                    if (response.ok) {
-                        const data = await response.json();
-                        updateEmotionDisplay(data);
-                        updateStats(data.confidence || 0);
-                        log(`✅ Frame analyzed: ${data.emotion} (${(data.confidence * 100).toFixed(1)}%)`);
-                    } else {
-                        const errorText = await response.text();
-                        log(`❌ Frame analysis failed: ${response.status} - ${errorText}`);
-                    }
-                } catch (error) {
-                    log(`❌ Detection error: ${error.message}`);
-                    console.error('Full error details:', error);
-                }
-            }, 'image/jpeg', 0.8);
-            
-            // Continue detection loop (every 1000ms for more stability)
-            if (detectionActive) {
-                setTimeout(() => requestAnimationFrame(detectionLoop), 1000);
-            }
-        }
-
-        function stopDetection() {
-            detectionActive = false;
-            log('⏹️ Detection stopped');
-        }
-
-        function updateEmotionDisplay(data) {
-            const emoji = emotionEmojis[data.emotion] || '😐';
-            const confidence = ((data.confidence || 0) * 100).toFixed(1);
-            
-            document.getElementById('emotionEmoji').textContent = emoji;
-            document.getElementById('emotionName').textContent = 
-                data.emotion.charAt(0).toUpperCase() + data.emotion.slice(1);
-            document.getElementById('emotionConfidence').textContent = `Confidence: ${confidence}%`;
-        }
-
-        function updateStats(confidence) {
-            detectionCount++;
-            confidenceSum += confidence;
-            const avgConfidence = ((confidenceSum / detectionCount) * 100).toFixed(1);
-            
-            document.getElementById('detectionCount').textContent = detectionCount;
-            document.getElementById('avgConfidence').textContent = `${avgConfidence}%`;
-        }
-
-        function updateLoop() {
-            if (detectionActive) {
-                const now = performance.now();
-                if (now - lastFrameTime > 16) { // ~60fps limit
-                    const fps = Math.round(1000 / (now - lastFrameTime));
-                    document.getElementById('fps').textContent = fps;
-                    lastFrameTime = now;
-                }
-                requestAnimationFrame(updateLoop);
-            }
-        }
-
-        window.addEventListener('beforeunload', function() {
-            stopCamera();
+            // Stop detection
             stopDetection();
-        });
 
-        // Remove WebSocket references since we're using direct HTTP requests
-        // The detection now sends actual camera frames to the backend for analysis
+            // 更新UI状态
+            document.getElementById('startCameraBtn').disabled = false;
+            document.getElementById('stopCameraBtn').disabled = true;
+            document.getElementById('captureBtn').disabled = true;
+            document.getElementById('startDetectionBtn').disabled = true;
+            
+            document.getElementById('cameraStatus').className = 'status-indicator';
+            document.getElementById('cameraOverlay').textContent = 'Camera stopped';
+
+            log('Camera stopped', 'info');
+        }
+
+        // Capture and analyze
+        async function captureAndAnalyze() {
+            if (!videoStream) {
+                log('Camera not started', 'error');
+                return;
+            }
+
+            try {
+                const videoElement = document.getElementById('videoElement');
+                const canvas = document.getElementById('captureCanvas');
+                const ctx = canvas.getContext('2d');
+
+                // Set canvas size
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
+
+                // Draw current frame
+                ctx.drawImage(videoElement, 0, 0);
+
+                // Convert to blob
+                canvas.toBlob(async (blob) => {
+                    await analyzeImage(blob);
+                }, 'image/jpeg', 0.8);
+
+            } catch (error) {
+                log(`Capture failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Analyze image
+        async function analyzeImage(imageBlob) {
+            try {
+                log('Analyzing emotion...', 'info');
+                
+                // Create FormData
+                const formData = new FormData();
+                formData.append('image', imageBlob, 'capture.jpg');
+
+                // Send to backend for analysis
+                const response = await fetch(`${CONFIG.API_BASE}/analyze_emotion`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    updateEmotionDisplay(result.emotion, result.confidence);
+                    currentEmotion = result.emotion;
+                    
+                    detectionCount++;
+                    document.getElementById('detectionCount').textContent = detectionCount;
+                    document.getElementById('lastDetection').textContent = new Date().toLocaleTimeString();
+                    
+                    log(`Detected emotion: ${result.emotion} (${(result.confidence * 100).toFixed(1)}%)`, 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+            } catch (error) {
+                log(`Emotion analysis failed: ${error.message}`, 'error');
+                
+                // Use simulated data
+                const mockEmotions = ['happy', 'sad', 'neutral', 'surprise'];
+                const mockEmotion = mockEmotions[Math.floor(Math.random() * mockEmotions.length)];
+                const mockConfidence = 0.6 + Math.random() * 0.3;
+                
+                updateEmotionDisplay(mockEmotion, mockConfidence);
+                currentEmotion = mockEmotion;
+                
+                detectionCount++;
+                document.getElementById('detectionCount').textContent = detectionCount;
+                document.getElementById('lastDetection').textContent = new Date().toLocaleTimeString();
+                
+                log(`Using simulated data: ${mockEmotion} (${(mockConfidence * 100).toFixed(1)}%)`, 'info');
+            }
+        }
+
+        // Update emotion display
+        function updateEmotionDisplay(emotion, confidence) {
+            document.getElementById('emotionEmoji').textContent = EMOTION_EMOJIS[emotion] || '😐';
+            document.getElementById('emotionText').textContent = EMOTION_NAMES[emotion] || emotion;
+            document.getElementById('confidenceBar').style.width = `${confidence * 100}%`;
+            document.getElementById('confidenceText').textContent = `Confidence: ${(confidence * 100).toFixed(1)}%`;
+            
+            // Update status indicator
+            const indicator = document.getElementById('emotionStatus');
+            indicator.className = 'status-indicator online';
+        }
+
+        // Start automatic detection
+        function startDetection() {
+            if (isDetecting || !videoStream) return;
+            
+            isDetecting = true;
+            document.getElementById('startDetectionBtn').disabled = true;
+            document.getElementById('stopDetectionBtn').disabled = false;
+            document.getElementById('detectionStatus').textContent = 'Detecting';
+            
+            log('Starting automatic emotion detection...', 'info');
+            
+            // Detect immediately once
+            captureAndAnalyze();
+            
+            // Regular detection
+            detectionInterval = setInterval(captureAndAnalyze, CONFIG.DETECTION_INTERVAL);
+        }
+
+        // Stop automatic detection
+        function stopDetection() {
+            if (!isDetecting) return;
+            
+            isDetecting = false;
+            document.getElementById('startDetectionBtn').disabled = false;
+            document.getElementById('stopDetectionBtn').disabled = true;
+            document.getElementById('detectionStatus').textContent = 'Stopped';
+            
+            if (detectionInterval) {
+                clearInterval(detectionInterval);
+                detectionInterval = null;
+            }
+            
+            // Update status indicator
+            const indicator = document.getElementById('emotionStatus');
+            indicator.className = 'status-indicator';
+            
+            log('Automatic emotion detection stopped', 'info');
+        }
+
+        // Send message
+        async function sendMessage(message) {
+            if (!message.trim()) return;
+
+            // Add user message to chat
+            addMessageToChat('user', message, currentEmotion);
+            
+            // Clear input field
+            document.getElementById('messageInput').value = '';
+            
+            try {
+                log(`Sending message: ${message} (emotion: ${currentEmotion})`, 'info');
+                
+                // Call unified API
+                const response = await fetch(`${CONFIG.API_BASE}/api/v1/unified/emotion_chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        user_id: CONFIG.USER_ID,
+                        session_id: CONFIG.SESSION_ID,
+                        emotion_context: currentEmotion,
+                        include_emotion: true,
+                        include_voice: false,
+                        use_session_context: true
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    addMessageToChat('ai', data.ai_response || data.response, data.detected_emotion);
+                    log('AI response successful', 'success');
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                log(`Send message failed: ${error.message}`, 'error');
+                
+                // Use simulated response
+                const mockResponses = {
+                    happy: 'I\'m glad to see you\'re in a good mood! Is there anything good you\'d like to share?',
+                    sad: 'I notice you look a bit sad, I\'m here to listen to you.',
+                    angry: 'I can sense your emotions, let\'s talk slowly about what happened.',
+                    fear: 'I understand your concerns, you\'re not alone in facing these.',
+                    surprise: 'It looks like something surprised you!',
+                    disgust: 'I can understand how you feel right now, is there something making you uncomfortable?',
+                    neutral: 'Hello! I\'m happy to chat with you, is there anything I can help you with?'
+                };
+                
+                const mockResponse = mockResponses[currentEmotion] || mockResponses.neutral;
+                addMessageToChat('ai', `[Simulated response] ${mockResponse}`, currentEmotion);
+            }
+        }
+
+        // Add message to chat interface
+        function addMessageToChat(type, content, emotion = null) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            const emotionText = emotion ? ` (${EMOTION_NAMES[emotion] || emotion})` : '';
+            
+            messageDiv.innerHTML = `
+                <div>${content}</div>
+                <div class="message-meta">${timestamp}${emotionText}</div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        // Clear chat
+        function clearChat() {
+            const chatContainer = document.getElementById('chatContainer');
+            chatContainer.innerHTML = '<div class="message system">Chat cleared</div>';
+            log('Chat cleared', 'info');
+        }
+
+        // New session
+        function newSession() {
+            CONFIG.SESSION_ID = `session_${Date.now()}`;
+            clearChat();
+            addMessageToChat('system', `New session created: ${CONFIG.SESSION_ID}`);
+            log(`New session created: ${CONFIG.SESSION_ID}`, 'info');
+        }
+
+        // Test chat
+        function testChat() {
+            const testMessages = [
+                'Hello!',
+                'I don\'t feel very good today',
+                'Can you help me analyze my emotions?'
+            ];
+            
+            const randomMessage = testMessages[Math.floor(Math.random() * testMessages.length)];
+            document.getElementById('messageInput').value = randomMessage;
+            sendMessage(randomMessage);
+        }
+
+        // Voice recording functionality
+        async function startRecording() {
+            try {
+                log('Starting microphone...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await processVoiceInput(audioBlob);
+                };
+                
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI state
+                document.getElementById('startRecordBtn').disabled = true;
+                document.getElementById('stopRecordBtn').disabled = false;
+                document.getElementById('recordingStatus').textContent = '🎤 Recording...';
+                document.getElementById('recordingStatus').style.color = '#dc3545';
+                
+                log('Microphone started successfully, recording started', 'success');
+                
+            } catch (error) {
+                log(`Microphone start failed: ${error.message}`, 'error');
+                alert('Cannot access microphone, please check permission settings');
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                
+                // Update UI state
+                document.getElementById('startRecordBtn').disabled = false;
+                document.getElementById('stopRecordBtn').disabled = true;
+                document.getElementById('recordingStatus').textContent = '⏳ Processing recording...';
+                document.getElementById('recordingStatus').style.color = '#ffc107';
+                
+                log('Recording stopped, processing...', 'info');
+            }
+        }
+        
+        async function processVoiceInput(audioBlob) {
+            try {
+                log('Processing voice input...', 'info');
+                
+                // Create FormData to send audio
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'voice_input.wav');
+                formData.append('session_id', CONFIG.SESSION_ID);
+                formData.append('user_id', CONFIG.USER_ID);
+                
+                // Call complete voice conversation API
+                const response = await fetch(`${CONFIG.API_BASE}/api/v1/voice_conversation`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const contentType = response.headers.get('content-type');
+                    
+                    if (contentType && contentType.includes('audio/mpeg')) {
+                        // Received audio response
+                        const audioData = await response.arrayBuffer();
+                        const userMessage = response.headers.get('X-User-Message') || 'Voice input';
+                        const aiResponse = response.headers.get('X-AI-Response') || 'AI voice response';
+                        const detectedEmotion = response.headers.get('X-Detected-Emotion') || 'neutral';
+                        
+                        // Debug info
+                        document.getElementById('voiceDebug').textContent = `STT: ${userMessage.substring(0, 50)}... | TTS: Audio generated`;
+                        
+                        // Display conversation content
+                        addMessageToChat('user', userMessage, detectedEmotion);
+                        addMessageToChat('ai', aiResponse, detectedEmotion);
+                        
+                        // Play AI voice response
+                        await playAudioResponse(audioData);
+                        
+                        log('Voice conversation completed successfully', 'success');
+                        
+                    } else {
+                        // Received JSON response (simulation mode)
+                        const data = await response.json();
+                        
+                        // Check data integrity
+                        const userMessage = data.user_message || 'Voice input failed';
+                        const aiResponse = data.ai_response || 'AI response failed';
+                        const detectedEmotion = data.detected_emotion || 'neutral';
+                        
+                        // Debug info
+                        document.getElementById('voiceDebug').textContent = `STT: ${data.stt_result?.method || 'unknown'} | TTS: ${data.tts_available ? 'Available' : 'Unavailable'}`;
+                        
+                        addMessageToChat('user', userMessage, detectedEmotion);
+                        addMessageToChat('ai', aiResponse, detectedEmotion);
+                        
+                        if (data.tts_available) {
+                            log('Voice conversation completed (TTS mode)', 'success');
+                        } else {
+                            log('Voice conversation completed (text mode)', 'info');
+                        }
+                        
+                        // If there's an error, display error message
+                        if (data.error) {
+                            log(`Voice processing error: ${data.error}`, 'error');
+                        }
+                    }
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+            } catch (error) {
+                log(`Voice processing failed: ${error.message}`, 'error');
+                addMessageToChat('system', `Voice processing failed: ${error.message}`);
+            } finally {
+                // Reset recording state
+                document.getElementById('recordingStatus').textContent = 'Ready to record...';
+                document.getElementById('recordingStatus').style.color = '#666';
+            }
+        }
+        
+        async function playAudioResponse(audioData) {
+            try {
+                // Create audio object and play
+                const audioBlob = new Blob([audioData], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                const audio = new Audio(audioUrl);
+                
+                // Save last audio response
+                lastAudioResponse = audio;
+                document.getElementById('playLastResponseBtn').disabled = false;
+                
+                // Play audio
+                await audio.play();
+                log('AI voice response playback completed', 'success');
+                
+                // Clean up URL object
+                audio.addEventListener('ended', () => {
+                    URL.revokeObjectURL(audioUrl);
+                });
+                
+            } catch (error) {
+                log(`Audio playback failed: ${error.message}`, 'error');
+            }
+        }
+        
+        function playLastResponse() {
+            if (lastAudioResponse) {
+                lastAudioResponse.currentTime = 0;
+                lastAudioResponse.play();
+                log('Replaying last AI response', 'info');
+            }
+        }
+        
+        function testVoiceFeature() {
+            // Test voice functionality
+            const testText = "This is a voice test, I am Aura, your AI companion.";
+            
+            fetch(`${CONFIG.API_BASE}/text_to_speech`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    text: testText,
+                    emotion: currentEmotion
+                })
+            })
+            .then(response => {
+                if (response.ok && response.headers.get('content-type')?.includes('audio/mpeg')) {
+                    return response.arrayBuffer();
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                if (data instanceof ArrayBuffer) {
+                    // Play audio response
+                    playAudioResponse(data);
+                    log('Voice test completed successfully', 'success');
+                } else {
+                    // Text response
+                    log(`Voice test result: ${data.status || 'completed'}`, 'info');
+                }
+            })
+            .catch(error => {
+                log(`Voice test failed: ${error.message}`, 'error');
+            });
+        }
+            
+            fetch(`${CONFIG.API_BASE}/text_to_speech`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    text: testText,
+                    emotion: currentEmotion
+                })
+            })
+            .then(response => {
+                if (response.ok && response.headers.get('content-type') === 'audio/mpeg') {
+                    return response.arrayBuffer();
+                } else {
+                    throw new Error('TTS unavailable or returned non-audio data');
+                }
+            })
+            .then(audioData => {
+                playAudioResponse(audioData);
+                addMessageToChat('system', `Voice test: "${testText}"`);
+            })
+            .catch(error => {
+                log(`Voice test failed: ${error.message}`, 'error');
+                addMessageToChat('system', `Voice test failed: ${error.message}`);
+            });
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Camera controls
+            document.getElementById('startCameraBtn').addEventListener('click', startCamera);
+            document.getElementById('stopCameraBtn').addEventListener('click', stopCamera);
+            document.getElementById('captureBtn').addEventListener('click', captureAndAnalyze);
+            
+            // Detection controls
+            document.getElementById('startDetectionBtn').addEventListener('click', startDetection);
+            document.getElementById('stopDetectionBtn').addEventListener('click', stopDetection);
+            
+            // Voice controls
+            document.getElementById('startRecordBtn').addEventListener('click', startRecording);
+            document.getElementById('stopRecordBtn').addEventListener('click', stopRecording);
+            document.getElementById('voiceTestBtn').addEventListener('click', testVoiceFeature);
+            document.getElementById('playLastResponseBtn').addEventListener('click', playLastResponse);
+            
+            // Chat controls
+            document.getElementById('sendBtn').addEventListener('click', () => {
+                const message = document.getElementById('messageInput').value;
+                sendMessage(message);
+            });
+            
+            document.getElementById('testChatBtn').addEventListener('click', testChat);
+            document.getElementById('clearChatBtn').addEventListener('click', clearChat);
+            document.getElementById('newSessionBtn').addEventListener('click', newSession);
+            
+            // Send message on Enter key
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    const message = this.value;
+                    sendMessage(message);
+                }
+            });
+            
+            log('Camera UI initialization completed', 'success');
+            log('Please click "Start Camera" to begin emotion recognition', 'info');
+            log('Click "🎤 Start Recording" for voice conversation', 'info');
+        });
     </script>
 </body>
 </html>

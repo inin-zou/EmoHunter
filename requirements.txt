@@ -1,14 +1,34 @@
+# Core FastAPI and server dependencies
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-opencv-python==4.8.1.78
-fer==22.5.0
-moviepy>=1.0.3
-tensorflow
-numpy>=1.24.0
-pillow>=10.0.0
 python-multipart==0.0.6
 websockets==12.0
-elevenlabs>=0.2.26
-python-dotenv==1.0.0
-pydantic>=2.5.0
 websocket-client==1.6.4
+
+# HTTP client for microservice communication
+httpx>=0.25.0
+
+# Data validation and configuration
+pydantic>=2.5.0
+pydantic-settings>=2.0.0
+python-dotenv==1.0.0
+
+# Emotion Analysis Engine dependencies
+opencv-python==4.8.1.78
+fer==22.5.0
+tensorflow>=2.13.0
+numpy>=1.24.0
+pillow>=10.0.0
+moviepy>=1.0.3
+
+# Conversation Engine dependencies
+openai>=1.0.0
+elevenlabs>=0.2.26
+
+# Incentive Engine dependencies (future blockchain integration)
+# web3>=6.0.0  # Uncomment when adding blockchain features
+
+# Development and testing
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+requests>=2.31.0
