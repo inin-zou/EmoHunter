@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # API Gateway - Main entry point
+  gateway:
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CAMERA_INDEX=${CAMERA_INDEX:-0}
+      - EMOTION_UPDATE_INTERVAL=${EMOTION_UPDATE_INTERVAL:-1.0}
+    depends_on:
+      - emotion-analysis
+      - conversation-engine
+      # - incentive-engine  # Under development
+    networks:
+      - emohunter-network
+    restart: unless-stopped
+
+  # Emotion Analysis Engine
+  emotion-analysis:
+    build:
+      context: .
+      dockerfile: services/emotion_analysis_engine/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - CAMERA_INDEX=${CAMERA_INDEX:-0}
+      - EMOTION_UPDATE_INTERVAL=${EMOTION_UPDATE_INTERVAL:-1.0}
+    devices:
+      - /dev/video0:/dev/video0  # Camera access (Linux)
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw  # X11 forwarding for camera
+    environment:
+      - DISPLAY=${DISPLAY}
+    networks:
+      - emohunter-network
+    restart: unless-stopped
+
+  # Conversation Engine
+  conversation-engine:
+    build:
+      context: .
+      dockerfile: services/conversation_engine/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - ELEVENLABS_API_KEY=${ELEVENLABS_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    networks:
+      - emohunter-network
+    restart: unless-stopped
+
+  # Incentive Engine (Under Development)
+  # incentive-engine:
+  #   build:
+  #     context: .
+  #     dockerfile: services/incentive_engine/Dockerfile
+  #   ports:
+  #     - "8003:8003"
+  #   environment:
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - REDIS_URL=${REDIS_URL}
+  #   networks:
+  #     - emohunter-network
+  #   restart: unless-stopped
+
+  # Optional: Redis for caching (future use)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - emohunter-network
+    restart: unless-stopped
+    profiles:
+      - with-redis
+
+  # Optional: PostgreSQL for data persistence (future use)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=emohunter
+      - POSTGRES_USER=emohunter
+      - POSTGRES_PASSWORD=emohunter_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - emohunter-network
+    restart: unless-stopped
+    profiles:
+      - with-database
+
+networks:
+  emohunter-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
