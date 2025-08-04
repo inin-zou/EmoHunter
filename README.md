@@ -8,15 +8,16 @@ A production-ready FastAPI application that combines real-time facial emotion de
 
 **✅ Multi-Platform Architecture**
 
-- **🎭 EmoHunter Backend**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app)
+- **🎭 EmoHunter Backend**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app) *(Deployment in progress)*
 - **🌐 Vault Frontend**: [https://pond-hack-multi-sig-vault.vercel.app/](https://pond-hack-multi-sig-vault.vercel.app/)
 - **📜 Smart Contracts**: [BSC Testnet - 0x3e27d1471e73BaB92D30A005218ba156Db13e76f](https://testnet.bscscan.com/address/0x3e27d1471e73BaB92D30A005218ba156Db13e76f#code)
 
 ### Architecture Overview
-- **EmoHunter Backend**: Deployed on Google Cloud Run with emotion detection & voice AI
+- **EmoHunter Backend**: Google Cloud Run deployment with emotion detection & simplified voice AI
 - **Vault Frontend**: Deployed on Vercel with multi-sig vault functionality
 - **Smart Contracts**: Deployed on BSC Testnet with incentive engine
 - **Integration**: Multi-service architecture with cross-platform communication
+- **Voice System**: Unified ElevenLabs TTS with consistent Rachel voice across all emotions
 
 ## ✨ Key Features
 
@@ -29,9 +30,10 @@ A production-ready FastAPI application that combines real-time facial emotion de
 
 ### 🤖 AI-Powered Voice Agent
 - **Emotional Intelligence**: GPT-4o integration for context-aware conversations
-- **Voice Synthesis**: ElevenLabs API with emotion-mapped voice selection
+- **Voice Synthesis**: ElevenLabs API with unified Rachel voice (consistent across all emotions)
 - **Session Management**: Persistent conversation context and user tracking
 - **Multi-Modal**: Text and audio response generation
+- **Simplified Configuration**: Single voice settings for better maintainability
 
 ### 🏗️ Production Architecture
 - **Modular Design**: Clean separation of services and concerns
@@ -39,6 +41,27 @@ A production-ready FastAPI application that combines real-time facial emotion de
 - **Cloud Native**: Docker containerization with Google Cloud Run deployment
 - **API-First**: RESTful endpoints with comprehensive documentation
 - **Real-Time Communication**: WebSocket support for live interactions
+
+## 🔄 Recent Improvements
+
+### Voice Configuration Simplification
+- **Unified Voice System**: Replaced emotion-based voice variations with single consistent Rachel voice
+- **Simplified Settings**: Single configuration (stability: 0.70, similarity_boost: 0.80, style: 0.50)
+- **Better Maintainability**: Reduced complexity while maintaining high-quality TTS
+- **Consistent User Experience**: Same voice quality across all emotional contexts
+
+### Deployment & Integration
+- **Branch Integration**: Successfully merged `contracts` and `backend-dev-zou` branches into `main`
+- **Dependency Resolution**: Fixed FastAPI/TensorFlow compatibility issues for GCP deployment
+- **Docker Optimization**: Enhanced Dockerfile with comprehensive system dependencies
+- **Clean Codebase**: Removed legacy files and consolidated documentation
+- **Multi-Platform Ready**: Aligned architecture across GCP, Vercel, and BSC testnet
+
+### Current Status
+- **Voice System**: ✅ Simplified and deployed
+- **Smart Contracts**: ✅ Live on BSC testnet
+- **Vault Frontend**: ✅ Live on Vercel
+- **Backend Deployment**: 🔄 In progress on GCP Cloud Run
 
 ## API Endpoints
 
