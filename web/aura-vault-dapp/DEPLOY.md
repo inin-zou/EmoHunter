@@ -6,23 +6,51 @@ npm run build
 npm run start
 ```
 
-## 步骤 2: 部署到 Vercel
+## 步骤 2: 部署静态构建产物
 
-### 方法一：Vercel CLI
+### 方法1：本地构建后直接部署
 ```bash
-npm install -g vercel
-vercel --prod
+npm run build
+vercel --prod --cwd build
 ```
 
-### 方法二：GitHub 集成
-1. 推送代码到 GitHub
-2. 登录 [vercel.com](https://vercel.com)
-3. 导入 GitHub 仓库
-4. 自动部署
+### 方法2：Vercel Dashboard 手动上传
+1. 运行 `npm run build` 生成本地 build
+2. 访问 [vercel.com](https://vercel.com)
+3. 点击 "New Project" → "Upload"
+4. 拖拽整个 `build/` 文件夹上传
+5. 自动部署
 
-### 方法三：直接上传
-1. 打包项目: `npm run build`
-2. 上传 `build/` 文件夹到 Vercel
+### 方法3：Vercel CLI 部署静态目录
+```bash
+npm run build
+vercel build --prod
+vercel deploy --prebuilt
+```
+
+### 方法4：GitHub Actions 自动部署
+创建 `.github/workflows/deploy.yml`:
+```yaml
+name: Deploy to Vercel
+on:
+  push:
+    branches: [main]
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run build
+      - uses: amondnet/vercel-action@v20
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-args: '--prod'
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+```
 
 ## 环境变量配置
 在 Vercel 控制台设置以下环境变量：
