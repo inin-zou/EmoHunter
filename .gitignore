@@ -246,3 +246,10 @@ uvicorn.log
 sessions/
 session_data/
 *.session
+
+
+# Cleanup scripts
+cleanup_legacy_files.py
+finalize_setup.py
+remove_incentive_service.py
+*.pyc

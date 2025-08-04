@@ -4,16 +4,19 @@
 
 A production-ready FastAPI application that combines real-time facial emotion detection with intelligent voice conversations. Built for the Pond Hackathon, EmoHunter creates emotionally-aware AI interactions using computer vision, natural language processing, and voice synthesis.
 
-🌐 **Live Demo**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app)
+## 🚀 Live Deployments
 
-## 🚀 Production Deployment
+**✅ Multi-Platform Architecture**
 
-**✅ Successfully deployed to Google Cloud Run!**
+- **🎭 EmoHunter Backend**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app)
+- **🌐 Vault Frontend**: [https://pond-hack-multi-sig-vault.vercel.app/](https://pond-hack-multi-sig-vault.vercel.app/)
+- **📜 Smart Contracts**: [BSC Testnet - 0x3e27d1471e73BaB92D30A005218ba156Db13e76f](https://testnet.bscscan.com/address/0x3e27d1471e73BaB92D30A005218ba156Db13e76f#code)
 
-- **Service URL**: https://emohunter-api-6106408799.us-central1.run.app
-- **Status**: Fully operational and production-ready
-- **Architecture**: Containerized with Docker, auto-scaling 0-10 instances
-- **Resources**: 2GB RAM, 2 CPUs, optimized for real-time processing
+### Architecture Overview
+- **EmoHunter Backend**: Deployed on Google Cloud Run with emotion detection & voice AI
+- **Vault Frontend**: Deployed on Vercel with multi-sig vault functionality
+- **Smart Contracts**: Deployed on BSC Testnet with incentive engine
+- **Integration**: Multi-service architecture with cross-platform communication
 
 ## ✨ Key Features
 
