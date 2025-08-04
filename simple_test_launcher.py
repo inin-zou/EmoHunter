@@ -428,19 +428,8 @@ async def text_to_speech(request: dict):
             "use_speaker_boost": True
         }
         
-        # Emotion-aware voice adjustments
-        emotion_adjustments = {
-            "happy": {"stability": 0.85, "style": 0.7},
-            "sad": {"stability": 0.3, "style": 0.2},
-            "angry": {"stability": 0.2, "style": 0.8},
-            "fear": {"stability": 0.15, "style": 0.3},
-            "surprise": {"stability": 0.4, "style": 0.9},
-            "disgust": {"stability": 0.6, "style": 0.4},
-            "neutral": {"stability": 0.7, "style": 0.5}
-        }
-        
-        if emotion in emotion_adjustments:
-            voice_settings.update(emotion_adjustments[emotion])
+        # Use consistent voice settings for all emotions
+        # Single voice configuration for simplicity
         
         # Call ElevenLabs TTS API
         headers = {

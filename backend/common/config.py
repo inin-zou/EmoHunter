@@ -51,14 +51,10 @@ class Settings(BaseSettings):
     conversation_history_size: int = 10  # Number of exchanges to keep
     default_voice: str = "Rachel"
     
-    # Voice synthesis settings
-    voice_stability_happy: float = 0.85
-    voice_stability_sad: float = 0.30
-    voice_stability_angry: float = 0.20
-    voice_stability_fear: float = 0.15
-    voice_stability_surprise: float = 0.40
-    voice_stability_disgust: float = 0.60
-    voice_stability_neutral: float = 0.70
+    # Voice synthesis settings (simplified - single voice configuration)
+    voice_stability: float = 0.70
+    voice_similarity_boost: float = 0.80
+    voice_style: float = 0.50
     
     # CORS settings
     cors_origins: list = ["*"]  # In production, specify your domain
@@ -89,43 +85,24 @@ def get_settings() -> Settings:
 
 
 def get_emotion_voice_mapping() -> dict:
-    """Get emotion to voice configuration mapping"""
+    """Get simplified voice configuration (same for all emotions)"""
+    # Single voice configuration for all emotions
+    voice_config = {
+        "voice": settings.default_voice,
+        "stability": settings.voice_stability,
+        "similarity_boost": settings.voice_similarity_boost,
+        "style": settings.voice_style
+    }
+    
+    # Return same configuration for all emotions
     return {
-        "happy": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_happy,
-            "similarity_boost": 0.80
-        },
-        "sad": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_sad,
-            "similarity_boost": 0.40
-        },
-        "angry": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_angry,
-            "similarity_boost": 0.30
-        },
-        "fear": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_fear,
-            "similarity_boost": 0.25
-        },
-        "surprise": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_surprise,
-            "similarity_boost": 0.60
-        },
-        "disgust": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_disgust,
-            "similarity_boost": 0.50
-        },
-        "neutral": {
-            "voice": settings.default_voice,
-            "stability": settings.voice_stability_neutral,
-            "similarity_boost": 0.70
-        }
+        "happy": voice_config,
+        "sad": voice_config,
+        "angry": voice_config,
+        "fear": voice_config,
+        "surprise": voice_config,
+        "disgust": voice_config,
+        "neutral": voice_config
     }
 
 

@@ -67,7 +67,7 @@ backend/
 - **Purpose**: Emotionally-aware conversation generation and text-to-speech
 - **Key Features**:
   - GPT-4o integration for context-aware responses
-  - ElevenLabs TTS with emotion-based voice modulation
+  - ElevenLabs TTS with consistent voice synthesis
   - Conversation history management
 - **Endpoints**:
   - `POST /api/v1/generate` - Generate text response
