@@ -16,7 +16,7 @@ python-dotenv==1.0.0
 # Emotion Analysis Engine dependencies
 opencv-python==4.8.1.78
 fer==22.5.0
-tensorflow>=2.13.0
+tensorflow==2.15.0
 numpy>=1.24.0
 pillow>=10.0.0
 moviepy>=1.0.3
