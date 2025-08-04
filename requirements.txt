@@ -1,6 +1,6 @@
-# Core FastAPI and server dependencies
-fastapi==0.100.1
-uvicorn[standard]==0.23.2
+# Core FastAPI and server dependencies (compatible with TensorFlow)
+fastapi==0.95.2
+uvicorn[standard]==0.22.0
 python-multipart==0.0.6
 websockets==12.0
 websocket-client==1.6.4
@@ -9,9 +9,11 @@ websocket-client==1.6.4
 httpx>=0.25.0
 
 # Data validation and configuration
-pydantic>=2.5.0
+pydantic==1.10.12
 pydantic-settings>=2.0.0
 python-dotenv==1.0.0
+# Pin typing-extensions to compatible version
+typing-extensions==4.5.0
 
 # Emotion Analysis Engine dependencies
 opencv-python==4.8.1.78
