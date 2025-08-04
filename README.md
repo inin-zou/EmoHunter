@@ -1,20 +1,41 @@
-# EmoHunter - FastAPI Backend for Real-Time Emotion Detection and Voice Agent
+# EmoHunter 🎭
 
-A FastAPI backend that provides real-time facial emotion detection from webcam and emotionally appropriate voice responses using ElevenLabs API.
+**Real-Time Emotion Detection & AI Voice Agent**
 
-## Features
+A production-ready FastAPI application that combines real-time facial emotion detection with intelligent voice conversations. Built for the Pond Hackathon, EmoHunter creates emotionally-aware AI interactions using computer vision, natural language processing, and voice synthesis.
 
-🎥 **Real-Time Emotion Detection**
-- Captures video from webcam using OpenCV
-- Processes frames using the `fer` library for emotion detection (with mock fallback)
-- Provides continuous emotion updates via REST API or WebSocket
-- **Note**: Currently using mock emotion detection due to FER library compatibility issues
+🌐 **Live Demo**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app)
 
-🗣️ **Voice Agent (TTS)**
-- Maps detected emotions to appropriate ElevenLabs voice styles
-- Generates emotionally appropriate speech responses
-- Returns audio as base64 for easy integration
-- **Note**: Requires ElevenLabs API key configuration
+## 🚀 Production Deployment
+
+**✅ Successfully deployed to Google Cloud Run!**
+
+- **Service URL**: https://emohunter-api-6106408799.us-central1.run.app
+- **Status**: Fully operational and production-ready
+- **Architecture**: Containerized with Docker, auto-scaling 0-10 instances
+- **Resources**: 2GB RAM, 2 CPUs, optimized for real-time processing
+
+## ✨ Key Features
+
+### 🎥 Real-Time Emotion Detection
+- **Computer Vision**: OpenCV-powered webcam integration
+- **Emotion Analysis**: Advanced facial emotion recognition with FER library
+- **Real-Time Streaming**: WebSocket and Server-Sent Events support
+- **Stability Engine**: Smart emotion persistence to prevent rapid changes
+- **Browser Integration**: Direct camera frame processing from web clients
+
+### 🤖 AI-Powered Voice Agent
+- **Emotional Intelligence**: GPT-4o integration for context-aware conversations
+- **Voice Synthesis**: ElevenLabs API with emotion-mapped voice selection
+- **Session Management**: Persistent conversation context and user tracking
+- **Multi-Modal**: Text and audio response generation
+
+### 🏗️ Production Architecture
+- **Modular Design**: Clean separation of services and concerns
+- **Scalable Backend**: FastAPI with async/await patterns
+- **Cloud Native**: Docker containerization with Google Cloud Run deployment
+- **API-First**: RESTful endpoints with comprehensive documentation
+- **Real-Time Communication**: WebSocket support for live interactions
 
 ## API Endpoints
 
@@ -40,54 +61,44 @@ A FastAPI backend that provides real-time facial emotion detection from webcam a
 
 ## Setup
 
-1. **Create Virtual Environment with uv**
-   ```bash
-   # Remove old venv if it exists
-   rm -rf venv
-   
-   # Create new virtual environment with uv
-   uv venv
-   
-   # Activate the virtual environment
-   source .venv/bin/activate
-   ```
+### 1. Setup Environment
+```bash
+# Create and activate virtual environment with uv
+uv venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-2. **Install Dependencies**
-   ```bash
-   # Install dependencies using uv (faster than pip)
-   uv pip install -r requirements.txt
-   ```
+# Install dependencies
+uv pip install -r requirements.txt
+```
 
-3. **Configure ElevenLabs API (Optional)**
-   ```bash
-   # Copy environment template
-   cp .env.example .env
-   # Edit .env and add your ElevenLabs API key
-   # ELEVENLABS_API_KEY=your_api_key_here
-   ```
+### 2. Configure Environment
+```bash
+# Copy and edit environment file
+cp .env.example .env
 
-4. **Run the Server**
-   ```bash
-   # Make sure virtual environment is activated
-   source .venv/bin/activate
-   
-   # Start the FastAPI server
-   python main.py
-   # or
-   uvicorn main:app --host 0.0.0.0 --port 8000 --reload
-   ```
+# Edit .env with your API keys:
+# ELEVENLABS_API_KEY=your_elevenlabs_key_here
+# OPENAI_API_KEY=your_openai_key_here
+```
 
-5. **Access the API**
-   - API Documentation: http://localhost:8000/docs
-   - Health Check: http://localhost:8000/health
-   - Current Emotion: http://localhost:8000/current_emotion
+### 3. Run Modular Backend
+```bash
+# Or run directly from backend directory
+cd backend && python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
-6. **Test the API**
-   ```bash
-   # Run the test client to validate all endpoints
-   source .venv/bin/activate
-   python test_client.py
-   ```
+# Legacy backend (if needed)
+python main.py
+```
+
+### 4. Test the Modular Architecture
+```bash
+# Run comprehensive modular architecture test suite
+python test_modular_architecture.py
+
+# Or test legacy components
+python test_client.py
+python test_new_architecture.py
+```
 
 ## Emotion to Voice Mapping
 
@@ -142,44 +153,48 @@ python test_client.py
 - `POST /talk` - Generate speech from text with emotion mapping
 - `GET /emotions/available` - List available emotions and voice mappings
 
-## Current Status
+## 🎯 Project Status
 
-### ✅ Working Features:
-- **FastAPI Backend**: Running on http://localhost:8000 with CORS support
-- **Real Camera Integration**: Browser camera frames sent to backend for analysis
-- **Stable Emotion Detection**: Improved stability logic prevents rapid emotion changes
-- **All API Endpoints**: Fully functional and tested
-- **WebSocket Streaming**: Real-time emotion updates
-- **Interactive Test UIs**: 
-  - `camera_test_ui.html` - Live camera emotion detection
-  - `test_ui.html` - Full API testing interface
-  - `websocket_test.html` - WebSocket streaming test
-- **Python Test Client**: Comprehensive API validation script
-- **ElevenLabs Integration**: Voice agent with emotion-based TTS (requires API key)
+### ✅ Production Ready
+- **🌐 Cloud Deployment**: Successfully deployed to Google Cloud Run
+- **🔧 Modular Architecture**: Professional backend structure with service separation
+- **🎭 Emotion Engine**: Real-time facial emotion detection with stability algorithms
+- **🗣️ Voice Synthesis**: ElevenLabs integration with emotion-mapped voices
+- **🤖 AI Conversations**: GPT-4o powered intelligent responses
+- **📱 Web Interface**: Modern HTML5/JavaScript frontend with camera integration
+- **🔄 Real-Time Streaming**: WebSocket and SSE support for live updates
+- **📊 Session Management**: Persistent user context and conversation tracking
 
-### 🎯 Recent Improvements:
-- **CORS Middleware**: Fixed browser "Failed to fetch" issues
-- **Camera Frame Processing**: Real browser camera frames sent to `/analyze_frame` endpoint
-- **Emotion Stability**: Added consistency logic to prevent rapid emotion changes
-- **Detection Frequency**: Optimized from 500ms to 1000ms for realistic behavior
-- **Mock Detection Enhancement**: 70% stability bias for more realistic demo behavior
+### 🏆 Recent Achievements
+- **Production Deployment**: Fully operational on Google Cloud Run
+- **Internationalization**: Complete translation from Chinese to English
+- **Code Cleanup**: Removed all legacy/obsolete files for clean codebase
+- **Architecture Refactor**: Implemented professional modular backend structure
+- **Performance Optimization**: Enhanced emotion stability and detection accuracy
 
-### ⚠️ Known Issues:
-- **FER Library Compatibility**: `moviepy.editor` import error prevents real facial emotion analysis
-- **ElevenLabs TTS**: Requires valid API key for voice generation
+### 🔧 Technical Highlights
+- **Docker Containerization**: Multi-architecture support (amd64/linux)
+- **Auto-Scaling**: 0-10 instances based on demand
+- **Health Monitoring**: Comprehensive endpoint monitoring and logging
+- **CORS Configuration**: Proper browser integration support
+- **Error Handling**: Robust exception management and user feedback
 
-### 🔧 Current Behavior:
-- **Mock Emotion Detection**: Provides realistic demo with stability improvements
-- **Camera Integration**: Full end-to-end camera → backend → emotion analysis pipeline working
-- **Stable Results**: Emotions persist for 3-5 seconds with natural transitions
+## 📋 Requirements
 
-## Requirements
+### System Requirements
+- **Python**: 3.12+ (recommended for optimal performance)
+- **Package Manager**: `uv` for fast dependency management
+- **Hardware**: Webcam access for emotion detection
+- **Network**: Internet connection for AI services
 
-- Python 3.12+ (recommended)
-- `uv` package manager (for faster dependency management)
-- Webcam access (currently functional)
-- ElevenLabs API key (optional, for voice generation)
-- Internet connection (for ElevenLabs API)
+### API Keys (Required for Full Functionality)
+- **ElevenLabs API**: Voice synthesis and TTS generation
+- **OpenAI API**: GPT-4o for intelligent conversations
+
+### Development Tools
+- **Docker**: For containerization and deployment
+- **Google Cloud SDK**: For cloud deployment (optional)
+- **Modern Browser**: Chrome/Firefox/Safari for web interface
 
 ## Usage Examples
 
@@ -204,18 +219,67 @@ ws.onmessage = function(event) {
 };
 ```
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **FastAPI** - Modern web framework for building APIs
-- **OpenCV** - Computer vision library for webcam access
+### Backend
+- **FastAPI** - High-performance async web framework
+- **OpenCV** - Computer vision and webcam processing
 - **FER** - Facial emotion recognition library
-- **ElevenLabs** - Text-to-speech API
-- **WebSockets** - Real-time communication
-- **TensorFlow** - Machine learning backend for emotion detection
+- **Pydantic** - Data validation and settings management
+- **Uvicorn** - ASGI server for production deployment
 
-## Notes
+### AI & Machine Learning
+- **OpenAI GPT-4o** - Advanced language model for conversations
+- **TensorFlow** - ML backend for emotion detection
+- **NumPy** - Numerical computing for image processing
 
-- The camera starts automatically when the server launches
-- Emotion detection runs continuously in the background
-- The API supports both polling and streaming for emotion updates
-- Voice generation requires an active internet connection and valid ElevenLabs API key
+### Voice & Audio
+- **ElevenLabs API** - Premium text-to-speech synthesis
+- **Base64 Audio** - Efficient audio data transmission
+
+### Real-Time Communication
+- **WebSockets** - Bidirectional real-time communication
+- **Server-Sent Events** - Live emotion streaming
+- **CORS Middleware** - Cross-origin resource sharing
+
+### Cloud & Deployment
+- **Google Cloud Run** - Serverless container platform
+- **Docker** - Containerization and deployment
+- **Google Container Registry** - Container image storage
+
+### Frontend
+- **HTML5** - Modern web standards
+- **JavaScript ES6+** - Interactive user interface
+- **WebRTC** - Browser camera access
+
+## 📝 Important Notes
+
+### 🎥 Camera & Emotion Detection
+- Camera initializes automatically on server startup
+- Emotion detection runs continuously with 1-second intervals
+- Stability algorithm prevents rapid emotion changes (3-5 second persistence)
+- Supports both browser camera integration and direct webcam access
+
+### 🗣️ Voice Generation
+- Requires active internet connection for ElevenLabs API
+- Valid API key needed for voice synthesis
+- Emotion-to-voice mapping provides contextually appropriate responses
+- Audio returned as base64 for easy web integration
+
+### 🌐 Deployment
+- Production service available at Google Cloud Run
+- Auto-scaling handles traffic spikes automatically
+- Health endpoints provide system status monitoring
+- CORS configured for browser-based applications
+
+### 🔧 Development
+- Use `camera_test_ui.html` for local testing
+- WebSocket endpoints available for real-time integration
+- Comprehensive API documentation at `/docs` endpoint
+- Session management maintains conversation context
+
+---
+
+**Built with ❤️ for the Pond Hackathon**
+
+*EmoHunter demonstrates the future of emotionally-aware AI interactions, combining cutting-edge computer vision, natural language processing, and voice synthesis into a seamless user experience.*
