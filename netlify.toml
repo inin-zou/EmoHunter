@@ -1,0 +1,47 @@
+[build]
+  # Build command for the EmoHunter application
+  command = "echo 'EmoHunter Backend API - No build required'"
+  
+  # Publish directory (for static files if any)
+  publish = "."
+  
+  # Functions directory for serverless functions
+  functions = "netlify/functions"
+
+[build.environment]
+  # Python version
+  PYTHON_VERSION = "3.9"
+  
+  # Node.js version (if needed for any build tools)
+  NODE_VERSION = "18"
+
+# Redirect all API calls to the main launcher
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Headers for CORS and security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+
+# Environment variables (these will be set in Netlify dashboard)
+[context.production.environment]
+  ELEVENLABS_API_KEY = ""  # Set in Netlify dashboard
+  OPENAI_API_KEY = ""      # Set in Netlify dashboard
+  
+[context.deploy-preview.environment]
+  ELEVENLABS_API_KEY = ""  # Set in Netlify dashboard
+  OPENAI_API_KEY = ""      # Set in Netlify dashboard

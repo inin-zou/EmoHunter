@@ -112,6 +112,21 @@ ENV/
 env.bak/
 venv.bak/
 
+# Deployment exclusions
+emo-hunter/
+contracts/
+google-cloud-sdk/
+*.log
+*.tmp
+*.cache
+node_modules/
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
 # Spyder project settings
 .spyderproject
 .spyproject
