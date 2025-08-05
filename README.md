@@ -1,14 +1,14 @@
 # EmoHunter 🎭
 
-**Real-Time Emotion Detection & AI Voice Agent**
+**Real-Time Emotion Detection & AI Voice Agent with Apple Watch Biometric Integration**
 
-A production-ready FastAPI application that combines real-time facial emotion detection with intelligent voice conversations. Built for the Pond Hackathon, EmoHunter creates emotionally-aware AI interactions using computer vision, natural language processing, and voice synthesis.
+A production-ready FastAPI application that combines real-time facial emotion detection, Apple Watch biometric data analysis, and intelligent voice conversations. Built for the Pond Hackathon, EmoHunter creates emotionally-aware AI interactions using computer vision, physiological data analysis, natural language processing, and voice synthesis for comprehensive mental health monitoring.
 
 ## 🚀 Live Deployments
 
 **✅ Multi-Platform Architecture**
 
-- **🎭 EmoHunter Backend**: [https://emohunter-api-6106408799.us-central1.run.app](https://emohunter-api-6106408799.us-central1.run.app) *(Deployment in progress)*
+- **🎭 EmoHunter Backend**: [https://emohunter-biometric-api-6106408799.us-central1.run.app](https://emohunter-biometric-api-6106408799.us-central1.run.app) *(Live with Apple Watch Integration)*
 - **🌐 Vault Frontend**: [https://pond-hack-multi-sig-vault.vercel.app/](https://pond-hack-multi-sig-vault.vercel.app/)
 - **📜 Smart Contracts**: [BSC Testnet - 0x3e27d1471e73BaB92D30A005218ba156Db13e76f](https://testnet.bscscan.com/address/0x3e27d1471e73BaB92D30A005218ba156Db13e76f#code)
 
@@ -84,6 +84,22 @@ A production-ready FastAPI application that combines real-time facial emotion de
 - `GET /` - API welcome message
 - `GET /emotions/available` - List available emotions and voice mappings
 - `GET /health` - System status and camera info
+
+### 🍎 Apple Watch Biometric Integration (NEW)
+- `POST /api/v1/biometric/upload` - Upload Apple Watch biometric data
+- `POST /api/v1/biometric/mock/{user_id}` - Generate mock biometric data for testing
+- `GET /api/v1/biometric/context/{user_id}` - Get biometric emotional context
+- `GET /api/v1/biometric/triggers/{user_id}` - Get biometric triggers and alerts
+- `POST /api/v1/biometric/proactive_intervention/{user_id}` - Trigger proactive interventions
+- `GET /integrated_analysis/{user_id}` - Combined facial emotion + biometric analysis
+
+#### Key Features:
+- **Multi-Condition Trigger Detection**: `IF (Resting HR > baseline + 15%) AND (HRV < baseline - 20%) AND (Sleep quality poor ≥ 3 days) THEN → "anxious state"`
+- **Personalized Baselines**: Individual physiological normal values with deviation detection
+- **CBT/DBT Integration**: Evidence-based therapeutic recommendations and interventions
+- **Proactive Monitoring**: Background analysis with automatic intervention triggers
+- **Wellness Scoring**: Comprehensive health assessment (0-100 scale)
+- **Mock Data Generation**: Realistic fallback data for testing and demonstrations
 
 ## Setup
 
@@ -308,4 +324,8 @@ ws.onmessage = function(event) {
 
 **Built with ❤️ for the Pond Hackathon**
 
-*EmoHunter demonstrates the future of emotionally-aware AI interactions, combining cutting-edge computer vision, natural language processing, and voice synthesis into a seamless user experience.*
+*# 🎭 EmoHunter
+
+**Emotionally-aware AI companion with real-time facial emotion detection, Apple Watch biometric integration, voice interaction, and intelligent conversation generation.**
+
+EmoHunter combines cutting-edge computer vision, Apple Watch biometric data analysis, natural language processing, and voice synthesis to create an AI that truly understands and responds to human emotions through multiple data sources including facial expressions, physiological signals, and conversational context.*
