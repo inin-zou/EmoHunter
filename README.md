@@ -1,8 +1,8 @@
 # EmoHunter 🎭
 
-**Real-Time Emotion Detection & AI Voice Agent with Apple Watch Biometric Integration**
+**Backend API for Swift Mobile App with Real-Time Emotion Detection & Apple Watch Biometric Integration**
 
-A production-ready FastAPI application that combines real-time facial emotion detection, Apple Watch biometric data analysis, and intelligent voice conversations. Built for the Pond Hackathon, EmoHunter creates emotionally-aware AI interactions using computer vision, physiological data analysis, natural language processing, and voice synthesis for comprehensive mental health monitoring.
+A production-ready backend service that powers the EmoHunter Swift mobile application, providing real-time facial emotion detection, Apple Watch biometric data analysis, and intelligent voice conversations. Built for the Pond Hackathon, this backend enables emotionally-aware AI interactions through computer vision, physiological data analysis, natural language processing, and voice synthesis for comprehensive mental health monitoring.
 
 ## 🚀 Live Deployments
 
@@ -144,15 +144,15 @@ python test_new_architecture.py
 
 ## Emotion to Voice Mapping
 
-| Emotion | ElevenLabs Voice | Characteristics |
-|---------|------------------|-----------------|
-| Happy | Rachel | Bright, cheerful |
-| Sad | Bella | Soft, gentle |
-| Angry | Josh | Strong, assertive |
-| Fear | Elli | Cautious, gentle |
-| Surprise | Antoni | Energetic, expressive |
-| Disgust | Arnold | Neutral, controlled |
-| Neutral | Sam | Balanced, natural |
+| Emotion | Characteristics |
+|---------|-----------------|
+| Happy |Bright, cheerful |
+| Sad | Soft, gentle |
+| Angry | Strong, assertive |
+| Fear | Cautious, gentle |
+| Surprise | Energetic, expressive |
+| Disgust | Neutral, controlled |
+| Neutral | Balanced, natural |
 
 ## Testing
 
