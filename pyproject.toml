@@ -1,0 +1,36 @@
+[project]
+name = "emohunter"
+version = "0.1.0"
+description = "EmoHunter Trust Commit System with KiteAI blockchain integration"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # Core FastAPI and server dependencies
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.23.0",
+    "python-multipart>=0.0.6",
+    
+    # HTTP client for microservice communication
+    "httpx>=0.25.0",
+    
+    # Data validation and configuration
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    
+    # Trust Commit System dependencies (core functionality)
+    "sqlmodel>=0.0.8",
+    "pynacl>=1.5.0",
+    "cryptography>=41.0.0",
+    "aiosqlite>=0.21.0",
+    "greenlet>=3.0.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "requests>=2.31.0",
+]
