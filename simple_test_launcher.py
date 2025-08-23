@@ -599,6 +599,96 @@ async def synthesize_speech(request: dict):
     # Forward to new TTS endpoint
     return await text_to_speech(request)
 
+# Complete text conversation endpoint
+@app.post("/api/v1/text_conversation")
+async def text_conversation(request: dict):
+    """
+    Complete text conversation workflow:
+    1. Accept text input directly (no STT needed)
+    2. Camera emotion detection
+    3. OpenAI GPT-4o: Emotion-aware conversation generation
+    4. ElevenLabs TTS: Text to speech (always generate audio)
+    """
+    try:
+        # Extract parameters from request
+        user_message = request.get("message", "").strip()
+        session_id = request.get("session_id")
+        user_id = request.get("user_id", "text_user")
+        
+        if not user_message:
+            return {
+                "error": "Message is required",
+                "message": "Please provide a text message"
+            }
+        
+        # Step 1: Get current emotion (same as voice conversation)
+        emotion_data = await get_current_emotion()
+        detected_emotion = emotion_data["emotion"]
+        
+        # Step 2: Generate conversation response
+        if not session_id:
+            session_id = f"text_session_{int(time.time())}"
+        
+        conversation_request = {
+            "message": user_message,
+            "emotion_context": detected_emotion,
+            "session_id": session_id,
+            "user_id": user_id
+        }
+        
+        conversation_response = await generate_conversation(conversation_request)
+        ai_response = conversation_response["response"]
+        
+        # Step 3: Text to speech (always generate audio, same as voice conversation)
+        tts_request = {
+            "text": ai_response,
+            "emotion": detected_emotion
+        }
+        
+        # Check if ElevenLabs API key is available
+        if ELEVENLABS_API_KEY:
+            # Return audio response directly (same as voice conversation)
+            tts_response = await text_to_speech(tts_request)
+            
+            # If TTS successful, return audio stream
+            if isinstance(tts_response, Response):
+                # Use ASCII encoding to handle non-ASCII characters in headers
+                safe_user_message = user_message.encode('ascii', 'ignore').decode('ascii') if user_message else 'text_input'
+                safe_ai_response = ai_response.encode('ascii', 'ignore').decode('ascii') if ai_response else 'ai_response'
+                
+                return Response(
+                    content=tts_response.body,
+                    media_type="audio/mpeg",
+                    headers={
+                        "X-User-Message": safe_user_message,
+                        "X-AI-Response": safe_ai_response,
+                        "X-Detected-Emotion": detected_emotion,
+                        "X-Session-ID": session_id,
+                        "X-Input-Method": "text",
+                        "Content-Disposition": "attachment; filename=text_response.mp3"
+                    }
+                )
+        
+        # If no API key or TTS failed, return JSON result
+        return {
+            "user_message": user_message,
+            "ai_response": ai_response,
+            "detected_emotion": detected_emotion,
+            "session_id": session_id,
+            "tts_available": bool(ELEVENLABS_API_KEY),
+            "context_used": conversation_response["context_used"],
+            "timestamp": time.time(),
+            "error": "TTS not available - please set ELEVENLABS_API_KEY" if not ELEVENLABS_API_KEY else "TTS generation failed"
+        }
+        
+    except Exception as e:
+        print(f"Text conversation error: {e}")
+        return {
+            "error": str(e),
+            "message": "Text conversation processing failed",
+            "timestamp": time.time()
+        }
+
 # Complete voice conversation endpoint
 @app.post("/api/v1/voice_conversation")
 async def voice_conversation(audio: UploadFile = File(...), session_id: str = None, user_id: str = "voice_user"):
@@ -651,7 +741,7 @@ async def voice_conversation(audio: UploadFile = File(...), session_id: str = No
             
             # If TTS successful, return audio stream
             if isinstance(tts_response, Response):
-                # Use ASCII encoding to handle Chinese headers
+                # Use ASCII encoding to handle non-ASCII characters in headers
                 safe_user_message = user_message.encode('ascii', 'ignore').decode('ascii') if user_message else 'voice_input'
                 safe_ai_response = ai_response.encode('ascii', 'ignore').decode('ascii') if ai_response else 'ai_response'
                 
@@ -1018,6 +1108,7 @@ def main():
     print("  ✅ Apple Watch biometric data - /api/v1/biometric/*")
     print("  ✅ ElevenLabs STT - /speech_to_text")
     print("  ✅ ElevenLabs TTS - /text_to_speech")
+    print("  ✅ Complete text conversation - /api/v1/text_conversation")
     print("  ✅ Complete voice conversation - /api/v1/voice_conversation")
     print("  ✅ Conversation engine - /generate") 
     print("  ✅ API Gateway - /api/v1/unified/emotion_chat")
